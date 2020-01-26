@@ -1,2 +1,3 @@
 /todays_mwe -> returns todays mwe
-/user_info -> returns user information
+/submit -> submits a new mwe
+/review -> review other mwes
