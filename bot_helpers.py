@@ -10,15 +10,21 @@ def get_user_from_update(update: Update) -> User:
 
     if user is None:
         new_user = User(id=update.effective_user.id, username=update.effective_user.username)
+        if new_user.username is None:
+            new_user.username = str(new_user.id)
         session.add(new_user)
         session.commit()
         return new_user
+    else:
+        if (user.username == str(user.id) or user.username is None) and update.effective_user.username is not None:
+            user.username = update.effective_user.username
+            session.commit()
 
     return user
 
-mwe_category_keyboard = [['contiguous instance for usage as a MWE'],
-                         ['non-contiguous instance for usage as a MWE'],
-                         ['instance for usage as non-MWE']]
+mwe_category_keyboard = [['All the words in “GIVE UP” are 👏 together'],
+                         ['Some words in “GIVE UP” are 🙌 separated'],
+                         ['“GIVE” and “UP” do not form a special meaning together ✋ 🤚.']]
 
 mwe_category_keyboard_markup = telegram.ReplyKeyboardMarkup(mwe_category_keyboard)
 

@@ -1,4 +1,5 @@
 import random
+from collections import defaultdict
 
 import telegram
 from telegram import Update, ChatAction
@@ -124,10 +125,11 @@ def message(update: Update, context: CallbackContext):
             context.user_data["submission"] = submission
             context.user_data["state"] = "submit_example_type"
         elif state == "submit_example_type":
-            sub_types = ['contiguous instance for usage as a MWE',
-                         'non-contiguous instance for usage as a MWE',
-                         'instance for usage as non-MWE'
-                        ]
+            sub_types = [
+                'All the words in “GIVE UP” are 👏 together',
+                'Some words in “GIVE UP” are 🙌 separated',
+                '“GIVE” and “UP” do not form a special meaning together ✋ 🤚.'
+            ]
             if update.message.text in sub_types:
                 user = get_user_from_update(update)
                 submission = context.user_data["submission"]
@@ -204,3 +206,50 @@ def message(update: Update, context: CallbackContext):
 
 message_handler = MessageHandler(Filters.text, message)
 dispatcher.add_handler(message_handler)
+
+
+def scoreboard(update: Update, context: CallbackContext):
+    message_user = get_user_from_update(update)
+    user_scores = defaultdict(int)
+    for submission in session.query(Submission):
+        user_scores[submission.user] += submission.points
+
+    user_scores_list = list()
+    for user in user_scores.keys():
+        user_scores_list.append([user, user_scores[user]])
+
+    user_scores_list.sort(key=lambda x: x[1])
+    user_scores_list.reverse()
+
+    if len(user_scores_list) > 0:
+        scoreboard_message = "Here are the top 5 users for today:\n"
+        user_appeared_in_first_five = False
+        for i in range(0, 5):
+            if i >= len(user_scores_list):
+                break
+            rankings = ["🥇", "🥈", "🥉", "4.", "5."]
+            username = user_scores_list[i][0].username
+            if message_user.id == user_scores_list[i][0].id:
+                username = "*%s*" % username
+                user_appeared_in_first_five = True
+            ranking = rankings[i]
+            if message_user.id == user_scores_list[i][0].id:
+                ranking = "*%s*" % ranking
+            point = user_scores_list[i][1]
+            scoreboard_message += "%s %s - %d" % (ranking, username, point) + "\n"
+
+        if not user_appeared_in_first_five:
+            for i in range(len(user_scores_list)):
+                if user_scores_list[i][0].id == message_user.id:
+                    scoreboard_message += "...\n"
+                    scoreboard_message += "%d. %s - %d" % (i + 1, message_user.username, user_scores_list[i][1]) + "\n"
+        update.message.reply_text(scoreboard_message,
+                                  parse_mode=telegram.ParseMode.MARKDOWN)
+    else:
+        update.message.reply_text("There are no submissions and users at this time.")
+
+
+
+
+scoreboard_handler = CommandHandler('score', scoreboard)
+dispatcher.add_handler(scoreboard_handler)
