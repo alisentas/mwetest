@@ -10,6 +10,7 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     username = Column(String)
     submissions = relationship("Submission", back_populates="user")
+    suggestions = relationship("Suggestion", back_populates="user")
 
     def __repr__(self):
         return "<User(id='%s', name='%s')>" % (self.id, self.username)

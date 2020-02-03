@@ -8,6 +8,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Callb
 from bot_helpers import get_user_from_update, mwe_category_keyboard_markup, review_type_keyboard_markup
 from database import session
 from submission import Submission
+from suggestion import Suggestion
 from users import User
 import key
 
@@ -53,6 +54,14 @@ def submit(update: Update, context: CallbackContext):
 submit_handler = CommandHandler('submit', submit)
 dispatcher.add_handler(submit_handler)
 
+def suggest(update: Update, context: CallbackContext):
+    update.message.reply_text("Please suggest a new MWE",
+                              parse_mode=telegram.ParseMode.MARKDOWN)
+    context.user_data["state"] = "suggest_example"
+
+suggest_handler = CommandHandler('suggest', suggest)
+dispatcher.add_handler(suggest_handler)
+
 
 def review(update: Update, context: CallbackContext):
     all_submissions = session.query(Submission).all()
@@ -80,15 +89,17 @@ def message(update: Update, context: CallbackContext):
             update.message.reply_text("Now please choose category of this example.",
                                       reply_markup=mwe_category_keyboard_markup)
             submission = Submission(value=update.message.text)
+            print(submission)
             context.user_data["submission"] = submission
             context.user_data["state"] = "submit_example_type"
         elif state == "submit_example_type":
             sub_types = ['contiguous instance for usage as a MWE',
                          'non-contiguous instance for usage as a MWE',
-                         'instance for usage as non-MWE',
-                         'synonym substitution for an instance',
-                         'antonym substitution for an instance',
-                         'other']
+                         'instance for usage as non-MWE'
+                         #'synonym substitution for an instance',
+                         #'antonym substitution for an instance',
+                         #'other'
+                        ]
             if update.message.text in sub_types:
                 user = get_user_from_update(update)
                 submission = context.user_data["submission"]
@@ -130,6 +141,22 @@ def message(update: Update, context: CallbackContext):
             else:
                 update.message.reply_text("Please enter a valid review",
                                           reply_markup=review_type_keyboard_markup)
+
+        elif state == "suggest_example":
+            try:
+                suggestion = Suggestion(value=update.message.text)
+                user = get_user_from_update(update)
+                suggestion.category = ""
+                suggestion.points = 0
+                suggestion.user = user
+                session.add(suggestion)
+                session.commit()
+
+                update.message.reply_text("Thank you for your contribution!")
+
+                del context.user_data["state"]
+            except Exception as ex:
+                print(ex)
 
     except KeyError:
         update.message.reply_text('Not found')
