@@ -22,9 +22,9 @@ def get_user_from_update(update: Update) -> User:
 
     return user
 
-mwe_category_keyboard = [['contiguous instance for usage as a MWE'],
-                         ['non-contiguous instance for usage as a MWE'],
-                         ['instance for usage as non-MWE']]
+mwe_category_keyboard = [['All the words in “GIVE UP” are 👏 together'],
+                         ['Some words in “GIVE UP” are 🙌 separated'],
+                         ['“GIVE” and “UP” do not form a special meaning together ✋ 🤚.']]
 
 mwe_category_keyboard_markup = telegram.ReplyKeyboardMarkup(mwe_category_keyboard)
 

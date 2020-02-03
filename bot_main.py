@@ -93,13 +93,11 @@ def message(update: Update, context: CallbackContext):
             context.user_data["submission"] = submission
             context.user_data["state"] = "submit_example_type"
         elif state == "submit_example_type":
-            sub_types = ['contiguous instance for usage as a MWE',
-                         'non-contiguous instance for usage as a MWE',
-                         'instance for usage as non-MWE'
-                         #'synonym substitution for an instance',
-                         #'antonym substitution for an instance',
-                         #'other'
-                        ]
+            sub_types = [
+                'All the words in “GIVE UP” are 👏 together',
+                'Some words in “GIVE UP” are 🙌 separated',
+                '“GIVE” and “UP” do not form a special meaning together ✋ 🤚.'
+            ]
             if update.message.text in sub_types:
                 user = get_user_from_update(update)
                 submission = context.user_data["submission"]
