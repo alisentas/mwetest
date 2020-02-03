@@ -18,10 +18,8 @@ def get_user_from_update(update: Update) -> User:
 
 mwe_category_keyboard = [['contiguous instance for usage as a MWE'],
                          ['non-contiguous instance for usage as a MWE'],
-                         ['instance for usage as non-MWE'],
-                         ['synonym substitution for an instance'],
-                         ['antonym substitution for an instance'],
-                         ['other']]
+                         ['instance for usage as non-MWE']]
+
 mwe_category_keyboard_markup = telegram.ReplyKeyboardMarkup(mwe_category_keyboard)
 
 review_type_keyboard = [['good'],

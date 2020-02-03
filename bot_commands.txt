@@ -1,3 +1,4 @@
 /todays_mwe -> returns todays mwe
 /submit -> submits a new mwe
 /review -> review other mwes
+/suggestion -> suggest new mwe
