@@ -63,17 +63,50 @@ dispatcher.add_handler(suggest_handler)
 
 
 def review(update: Update, context: CallbackContext):
-    all_submissions = session.query(Submission).all()
+
+    no_submissions_to_review = False
+
+    user = get_user_from_update(update)
+    all_submissions = session.query(Submission).filter(Submission.user_id != user.id).all()
+    total_submissions = len(all_submissions)
+    print(total_submissions)
+    inspected_submissions = 0
+
     if len(all_submissions) > 0:
-        submission = all_submissions[random.randrange(0, len(all_submissions))]
-        update.message.reply_text("Please enter your review for: '*" + submission.value + "*'. This is described as '*"
-                                  + submission.category + "*'",
-                                  parse_mode=telegram.ParseMode.MARKDOWN,
-                                  reply_markup=review_type_keyboard_markup)
-        context.user_data["state"] = "review"
-        context.user_data['submission'] = submission
+
+        try:
+            while True:
+
+                submission = all_submissions[random.randrange(0, len(all_submissions))]
+
+                if str(user.id) in submission.users_who_reviewed:
+                    inspected_submissions += 1
+
+                    if inspected_submissions == total_submissions:
+                        no_submissions_to_review = True
+                        break
+
+                    continue
+
+                if submission.users_who_reviewed == '' or str(user.id) not in submission.users_who_reviewed:
+                    break
+        except Exception as ex:
+            print(ex)
+
+        if no_submissions_to_review == False:
+            print('Van petlje: ', submission)
+            print(submission)
+            update.message.reply_text("Please enter your review for: '*" + submission.value + "*'. This is described as '*"
+                                      + submission.category + "*'",
+                                      parse_mode=telegram.ParseMode.MARKDOWN,
+                                      reply_markup=review_type_keyboard_markup)
+            context.user_data["state"] = "review"
+            context.user_data['submission'] = submission
+        else:
+            update.message.reply_text("There are no examples from other users right now...")
+
     else:
-        update.message.reply_text("There are no examples right now, be the first one to /submit.")
+        update.message.reply_text("There are no examples, be the first one to /submit.")
 
 
 review_handler = CommandHandler('review', review)
@@ -88,22 +121,19 @@ def message(update: Update, context: CallbackContext):
             update.message.reply_text("Now please choose category of this example.",
                                       reply_markup=mwe_category_keyboard_markup)
             submission = Submission(value=update.message.text)
-            print(submission)
             context.user_data["submission"] = submission
             context.user_data["state"] = "submit_example_type"
         elif state == "submit_example_type":
             sub_types = ['contiguous instance for usage as a MWE',
                          'non-contiguous instance for usage as a MWE',
                          'instance for usage as non-MWE'
-                         #'synonym substitution for an instance',
-                         #'antonym substitution for an instance',
-                         #'other'
                         ]
             if update.message.text in sub_types:
                 user = get_user_from_update(update)
                 submission = context.user_data["submission"]
                 submission.category = update.message.text
                 submission.points = 0
+                submission.users_who_reviewed = ''
                 submission.user = user
                 session.add(submission)
                 session.commit()
@@ -122,6 +152,16 @@ def message(update: Update, context: CallbackContext):
                             "don't know"]
             if update.message.text in review_types:
                 submission = context.user_data["submission"]
+
+                user = get_user_from_update(update)
+                print(user.id)
+                try:
+                    submission.users_who_reviewed += str(user.id) + ','
+                    session.commit()
+                except Exception as ex:
+                    print(ex)
+
+
                 if update.message.text == 'good':
                     submission.points += 1
                     send_message_to_user(submission.user, "Someone liked your example '*"
@@ -135,6 +175,7 @@ def message(update: Update, context: CallbackContext):
                 update.message.reply_text("Thank you for your review, you can now /submit another example "
                                           "or /review other submissions.",
                                           reply_markup=reply_markup)
+
                 del context.user_data["submission"]
                 del context.user_data["state"]
             else:

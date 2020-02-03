@@ -11,6 +11,8 @@ class Submission(Base):
     value = Column(String)
     category = Column(String)
     points = Column(Integer)
+    users_who_reviewed = Column(String)
+
     user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship("User", back_populates="submissions")
 
