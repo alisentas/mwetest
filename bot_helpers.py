@@ -10,9 +10,15 @@ def get_user_from_update(update: Update) -> User:
 
     if user is None:
         new_user = User(id=update.effective_user.id, username=update.effective_user.username)
+        if new_user.username is None:
+            new_user.username = str(new_user.id)
         session.add(new_user)
         session.commit()
         return new_user
+    else:
+        if user.username == str(user.id) and update.effective_user.username is not None:
+            user.username = update.effective_user.username
+            session.commit()
 
     return user
 
