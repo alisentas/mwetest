@@ -13,6 +13,7 @@ from submission import Submission
 from suggestion import Suggestion
 from users import User
 import key
+from functools import cmp_to_key
 
 updater = Updater(key.TELEGRAM_API_KEY, use_context=True)
 dispatcher = updater.dispatcher
@@ -64,52 +65,50 @@ def suggest(update: Update, context: CallbackContext):
 suggest_handler = CommandHandler('suggest', suggest)
 dispatcher.add_handler(suggest_handler)
 
+def compare_submissions(s1, s2):
+    if s1.users_who_reviewed.count(",") < s2.users_who_reviewed.count(","):
+        return -1
+    elif s1.users_who_reviewed.count(",") > s2.users_who_reviewed.count(","):
+        return 1
+    else:
+        return 0
 
 def review(update: Update, context: CallbackContext):
 
-    no_submissions_to_review = False
+    try:
+        user = get_user_from_update(update)
+        all_submissions = session.query(Submission).filter(Submission.user_id != user.id).all()
+        all_submissions_for_reviewing = [s for s in all_submissions if str(user.id) not in s.users_who_reviewed]
 
-    user = get_user_from_update(update)
-    all_submissions = session.query(Submission).filter(Submission.user_id != user.id).all()
-    total_submissions = len(all_submissions)
-    print(total_submissions)
-    inspected_submissions = 0
+        key = cmp_to_key(compare_submissions)
+        all_submissions_for_reviewing = sorted(all_submissions_for_reviewing, key=key)
 
-    if len(all_submissions) > 0:
+        print(all_submissions_for_reviewing)
+    except Exception as e:
+        update.message.reply_text(str(e))
 
-        try:
-            while True:
+    if len(all_submissions_for_reviewing) > 0:
 
-                submission = all_submissions[random.randrange(0, len(all_submissions))]
+        submission = all_submissions_for_reviewing[random.randrange(0, len(all_submissions_for_reviewing))]
 
-                if str(user.id) in submission.users_who_reviewed:
-                    inspected_submissions += 1
+        submission_category_messages = {
+            "together": 'All the words in “GIVE UP” are 👏 together',
+            "separated": 'Some words in “GIVE UP” are 🙌 separated',
+            "non-mwe": '“GIVE” and “UP” do NOT form a special meaning together ✋ 🤚.'
+        }
 
-                    if inspected_submissions == total_submissions:
-                        no_submissions_to_review = True
-                        break
-
-                    continue
-
-                if submission.users_who_reviewed == '' or str(user.id) not in submission.users_who_reviewed:
-                    break
-        except Exception as ex:
-            print(ex)
-
-        if no_submissions_to_review == False:
-            print('Van petlje: ', submission)
-            print(submission)
-            update.message.reply_text("Please enter your review for: '*" + submission.value + "*'. This is described as '*"
-                                      + submission.category + "*'",
-                                      parse_mode=telegram.ParseMode.MARKDOWN,
-                                      reply_markup=review_type_keyboard_markup)
-            context.user_data["state"] = "review"
-            context.user_data['submission'] = submission
-        else:
-            update.message.reply_text("There are no examples from other users right now...")
+        reply_message = "'*{}*'. This example was provided for the category where {}."\
+            .format(submission.value, submission_category_messages[submission.category])
+        update.message.reply_text(reply_message,
+                                  parse_mode=telegram.ParseMode.MARKDOWN,
+                                  reply_markup=review_type_keyboard_markup)
+        context.user_data["state"] = "review"
+        context.user_data['submission'] = submission
 
     else:
-        update.message.reply_text("There are no examples, be the first one to /submit.")
+        reply_markup = telegram.ReplyKeyboardRemove()
+        update.message.reply_text("There are no examples from other users right now 🙄, be the first one to /submit.",
+                                  reply_markup=reply_markup)
 
 
 review_handler = CommandHandler('review', review)
@@ -191,37 +190,38 @@ def message(update: Update, context: CallbackContext):
             else:
                 update.message.reply_text("Please choose a valid category.")
         elif state == 'review':
-            review_types = ['good',
-                            'bad',
-                            "don't know"]
+            review_types = ['👍 I agree. Nice example for this category',
+                            '👎 I do not like this example',
+                            '⏭ Skip this one',
+                            '😱 Quit reviewing']
+            user = get_user_from_update(update)
+            reply_markup = telegram.ReplyKeyboardRemove()
+
             if update.message.text in review_types:
                 submission = context.user_data["submission"]
 
-                user = get_user_from_update(update)
-                print(user.id)
-                try:
-                    submission.users_who_reviewed += str(user.id) + ','
-                    session.commit()
-                except Exception as ex:
-                    print(ex)
-
-
-                if update.message.text == 'good':
+                if update.message.text == review_types[0]:
+                    print('...user liked')
                     points_earned = points_earned_for_submission[submission.category]
                     submission.points += points_earned
                     reply_message = "%s! Someone else loved your great example, and you’ve earned %d points" \
                                     % (get_random_congrats_message(), points_earned)
                     send_message_to_user(submission.user, reply_message)
-                elif update.message.text == 'bad':
-                    submission.points -= 1
-                session.commit()
-                reply_markup = telegram.ReplyKeyboardRemove()
-                update.message.reply_text("Thank you for your review, you can now /submit another example "
-                                          "or /review other submissions.",
-                                          reply_markup=reply_markup)
-
-                del context.user_data["submission"]
-                del context.user_data["state"]
+                    submission.users_who_reviewed += str(user.id) + ','
+                    review(update, context)
+                elif update.message.text == review_types[1]:
+                    print('...user disliked')
+                    submission.users_who_reviewed += str(user.id) + ','
+                    review(update, context)
+                elif update.message.text == review_types[2]:
+                    print('...skipping')
+                    review(update, context)
+                elif update.message.text == review_types[3]:
+                    print('...quitting')
+                    update.message.reply_text("Thank you for your contribution!",
+                                              reply_markup=reply_markup)
+                    del context.user_data["submission"]
+                    del context.user_data["state"]
             else:
                 update.message.reply_text("Please enter a valid review",
                                           reply_markup=review_type_keyboard_markup)
