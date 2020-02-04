@@ -71,7 +71,13 @@ def compare_submissions(s1, s2):
     elif s1.users_who_reviewed.count(",") > s2.users_who_reviewed.count(","):
         return 1
     else:
-        return 0
+        randnum = random.randint(0, 11)
+        if randnum < 3:
+            return -1
+        elif randnum < 7:
+            return 0
+        else:
+            return 1
 
 def review(update: Update, context: CallbackContext):
 
