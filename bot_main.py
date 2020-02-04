@@ -37,7 +37,7 @@ dispatcher.add_handler(start_handler)
 
 
 def todays_mwe(update: Update, context: CallbackContext):
-    update.message.reply_text("Today's MWE is '*to give up*', meaning: _cease making an effort; admit defeat._",
+    update.message.reply_text("Today's MWE is '*give up*', meaning: _cease making an effort; admit defeat._",
                               parse_mode=telegram.ParseMode.MARKDOWN)
     update.message.reply_text("Type */submit* if you want to submit a new example or */review* if you want "
                               "to review an example.",
@@ -91,8 +91,8 @@ def review(update: Update, context: CallbackContext):
         submission = all_submissions_for_reviewing[0]
 
         submission_category_messages = {
-            "together": 'All the words in “GIVE UP” are 👏 together',
-            "separated": 'Some words in “GIVE UP” are 🙌 separated',
+            "together": 'all the words in “GIVE UP” are 👏 together',
+            "separated": 'some words in “GIVE UP” are 🙌 separated',
             "non-mwe": '“GIVE” and “UP” do NOT form a special meaning together ✋ 🤚.'
         }
 
@@ -106,7 +106,7 @@ def review(update: Update, context: CallbackContext):
 
     else:
         reply_markup = telegram.ReplyKeyboardRemove()
-        update.message.reply_text("Currently there are no examples ready for reviewing 🙄, please try later.",
+        update.message.reply_text("Currently there are no examples ready for reviewing. 🙄 Please try later.",
                                   reply_markup=reply_markup)
 
 
@@ -147,7 +147,7 @@ def message(update: Update, context: CallbackContext):
                     update.message.reply_text(get_random_congrats_message() + "! You will win 30 points whenever "
                                                                               "another player likes your example.",
                                               reply_markup=reply_markup)
-                    update.message.reply_text("Thank you for your submission, you can now /submit another example "
+                    update.message.reply_text("Thank you for your submission. You can now /submit another example "
                                               "or /review other submissions.",
                                               reply_markup=reply_markup)
                     del context.user_data["state"]
