@@ -144,8 +144,8 @@ def message(update: Update, context: CallbackContext):
                     session.add(submission)
                     session.commit()
                     reply_markup = telegram.ReplyKeyboardRemove()
-                    update.message.reply_text("Nice Job! You will win 30 points whenever another player likes "
-                                              "your example.",
+                    update.message.reply_text(get_random_congrats_message() + "! You will win 30 points whenever "
+                                                                              "another player likes your example.",
                                               reply_markup=reply_markup)
                     update.message.reply_text("Thank you for your submission, you can now /submit another example "
                                               "or /review other submissions.",
@@ -174,12 +174,12 @@ def message(update: Update, context: CallbackContext):
                 session.commit()
                 reply_markup = telegram.ReplyKeyboardRemove()
                 if update.message.text == 'All the words in “GIVE UP” are 👏 together':
-                    update.message.reply_text("Nice Job! You will win 10 points whenever another player likes "
-                                              "your example.",
+                    update.message.reply_text("%s! You will win 10 points whenever another player likes "
+                                              "your example." % get_random_congrats_message(),
                                               reply_markup=reply_markup)
                 elif update.message.text == 'Some words in “GIVE UP” are 🙌 separated':
-                    update.message.reply_text("Nice Job! You will win 20 points whenever another player likes "
-                                              "your example..",
+                    update.message.reply_text("%s! You will win 20 points whenever another player likes "
+                                              "your example.." % get_random_congrats_message(),
                                               reply_markup=reply_markup)
                 update.message.reply_text("Thank you for your submission, you can now /submit another example "
                                           "or /review other submissions.",
