@@ -5,7 +5,8 @@ import telegram
 from telegram import Update, ChatAction
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
-from bot_helpers import get_user_from_update, mwe_category_keyboard_markup, review_type_keyboard_markup
+from bot_helpers import get_user_from_update, mwe_category_keyboard_markup, review_type_keyboard_markup, \
+    mwe_category_level_1_keyboard_markup, mwe_category_level_2_keyboard_markup
 from database import session
 from submission import Submission
 from suggestion import Suggestion
@@ -119,35 +120,77 @@ def message(update: Update, context: CallbackContext):
         state = context.user_data["state"]
 
         if state == "submit_example":
-            update.message.reply_text("Now please choose category of this example.",
-                                      reply_markup=mwe_category_keyboard_markup)
+            update.message.reply_text('Does "GIVE UP" form a special meaning in this sentence?',
+                                      reply_markup=mwe_category_level_1_keyboard_markup)
             submission = Submission(value=update.message.text)
             context.user_data["submission"] = submission
-            context.user_data["state"] = "submit_example_type"
-        elif state == "submit_example_type":
+            context.user_data["state"] = "submit_example_type_1"
+        elif state == "submit_example_type_1":
+            sub_types = [
+                '“GIVE” and “UP” do form a special meaning together 🙌.',
+                '“GIVE” and “UP” do NOT form a special meaning together ✋ 🤚.'
+            ]
+            if update.message.text in sub_types:
+                if update.message.text == sub_types[0]:
+                    update.message.reply_text('Are the words "GIVE" and "UP" next to each other or are they separated?',
+                                              reply_markup=mwe_category_level_2_keyboard_markup)
+                    context.user_data["state"] = "submit_example_type_2"
+                    context.user_data["submission"] = update.message.text
+                elif update.message.text == sub_types[1]:
+                    user = get_user_from_update(update)
+                    submission = Submission()
+                    submission.value = update.message.text
+                    submission.category = "non-mwe"
+                    submission.points = 0
+                    submission.users_who_reviewed = ''
+                    submission.user = user
+                    session.add(submission)
+                    session.commit()
+                    reply_markup = telegram.ReplyKeyboardRemove()
+                    update.message.reply_text("Nice Job! You will win 30 points whenever another player likes "
+                                              "your example.",
+                                              reply_markup=reply_markup)
+                    update.message.reply_text("Thank you for your submission, you can now /submit another example "
+                                              "or /review other submissions.",
+                                              reply_markup=reply_markup)
+                    del context.user_data["state"]
+            else:
+                update.message.reply_text("Please choose a valid category.")
+            pass
+        elif state == "submit_example_type_2":
             sub_types = [
                 'All the words in “GIVE UP” are 👏 together',
-                'Some words in “GIVE UP” are 🙌 separated',
-                '“GIVE” and “UP” do not form a special meaning together ✋ 🤚.'
+                'Some words in “GIVE UP” are 🙌 separated'
             ]
             if update.message.text in sub_types:
                 user = get_user_from_update(update)
-                submission = context.user_data["submission"]
-                submission.category = update.message.text
+                submission = Submission()
+                submission.value = context.user_data["submission"]
+                if update.message.text == 'All the words in “GIVE UP” are 👏 together':
+                    submission.category = "together"
+                elif update.message.text == 'Some words in “GIVE UP” are 🙌 separated':
+                    submission.category = "separated"
                 submission.points = 0
                 submission.users_who_reviewed = ''
                 submission.user = user
                 session.add(submission)
                 session.commit()
                 reply_markup = telegram.ReplyKeyboardRemove()
+                if update.message.text == 'All the words in “GIVE UP” are 👏 together':
+                    update.message.reply_text("Nice Job! You will win 10 points whenever another player likes "
+                                              "your example.",
+                                              reply_markup=reply_markup)
+                elif update.message.text == 'Some words in “GIVE UP” are 🙌 separated':
+                    update.message.reply_text("Nice Job! You will win 20 points whenever another player likes "
+                                              "your example..",
+                                              reply_markup=reply_markup)
                 update.message.reply_text("Thank you for your submission, you can now /submit another example "
                                           "or /review other submissions.",
                                           reply_markup=reply_markup)
                 del context.user_data["submission"]
                 del context.user_data["state"]
             else:
-                update.message.reply_text("Please enter a valid MWE category",
-                                          reply_markup=mwe_category_keyboard_markup)
+                update.message.reply_text("Please choose a valid category.")
         elif state == 'review':
             review_types = ['good',
                             'bad',
@@ -200,8 +243,8 @@ def message(update: Update, context: CallbackContext):
             except Exception as ex:
                 print(ex)
 
-    except KeyError:
-        update.message.reply_text('Not found')
+    except Exception as ex:
+        update.message.reply_text(ex)
 
 
 message_handler = MessageHandler(Filters.text, message)

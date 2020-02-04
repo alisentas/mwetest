@@ -32,3 +32,13 @@ review_type_keyboard = [['good'],
                         ['bad'],
                         ["don't know"]]
 review_type_keyboard_markup = telegram.ReplyKeyboardMarkup(review_type_keyboard)
+
+mwe_category_level_1_keyboard = [['“GIVE” and “UP” do form a special meaning together 🙌.'],
+                                 ['“GIVE” and “UP” do NOT form a special meaning together ✋ 🤚.']]
+
+mwe_category_level_1_keyboard_markup = telegram.ReplyKeyboardMarkup(mwe_category_level_1_keyboard)
+
+mwe_category_level_2_keyboard = [['All the words in “GIVE UP” are 👏 together'],
+                                 ['Some words in “GIVE UP” are 🙌 separated']]
+
+mwe_category_level_2_keyboard_markup = telegram.ReplyKeyboardMarkup(mwe_category_level_2_keyboard)
