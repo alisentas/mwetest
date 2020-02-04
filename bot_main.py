@@ -6,7 +6,8 @@ from telegram import Update, ChatAction
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 from bot_helpers import get_user_from_update, mwe_category_keyboard_markup, review_type_keyboard_markup, \
-    mwe_category_level_1_keyboard_markup, mwe_category_level_2_keyboard_markup
+    mwe_category_level_1_keyboard_markup, mwe_category_level_2_keyboard_markup, points_earned_for_submission, \
+    get_random_congrats_message
 from database import session
 from submission import Submission
 from suggestion import Suggestion
@@ -206,13 +207,13 @@ def message(update: Update, context: CallbackContext):
 
 
                 if update.message.text == 'good':
-                    submission.points += 1
-                    send_message_to_user(submission.user, "Someone liked your example '*"
-                                         + submission.value + "*', nice job.")
+                    points_earned = points_earned_for_submission[submission.category]
+                    submission.points += points_earned
+                    reply_message = "%s! Someone else loved your great example, and you’ve earned %d points" \
+                                    % (get_random_congrats_message(), points_earned)
+                    send_message_to_user(submission.user, reply_message)
                 elif update.message.text == 'bad':
                     submission.points -= 1
-                    send_message_to_user(submission.user, "Someone disliked your example '*"
-                                         + submission.value + "*', better luck next time.")
                 session.commit()
                 reply_markup = telegram.ReplyKeyboardRemove()
                 update.message.reply_text("Thank you for your review, you can now /submit another example "

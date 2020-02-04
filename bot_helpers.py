@@ -1,3 +1,5 @@
+import random
+
 import telegram
 from telegram import Update
 
@@ -42,3 +44,50 @@ mwe_category_level_2_keyboard = [['All the words in “GIVE UP” are 👏 toget
                                  ['Some words in “GIVE UP” are 🙌 separated']]
 
 mwe_category_level_2_keyboard_markup = telegram.ReplyKeyboardMarkup(mwe_category_level_2_keyboard)
+
+
+congrats_messages = [
+    "Nice job",
+    "Well done",
+    "Super",
+    "Awesome",
+    "Magnificent",
+    "Swell",
+    "Superb",
+    "Monumental",
+    "Fantastic",
+    "Grand",
+    "Wonderful",
+    "Majestic",
+    "Stupendous",
+    "Spectacular",
+    "Colossal",
+    "Dynamite",
+    "Fabulous",
+    "Astounding",
+    "Great",
+    "Marvelous",
+    "Phenomenal",
+    "Smashing",
+    "Terrific",
+    "Tremendous",
+    "Prodigious",
+    "Cool",
+    "Groovy",
+    "Extraordinary",
+    "Tops",
+    "Exemplary",
+    "Champion",
+    "Superhero"
+]
+
+
+def get_random_congrats_message() -> str:
+    return congrats_messages[random.randint(0, len(congrats_messages))]
+
+
+points_earned_for_submission = {
+    "together": 10,
+    "separated": 20,
+    "non-mwe": 30
+}
