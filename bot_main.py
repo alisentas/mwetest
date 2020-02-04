@@ -181,7 +181,7 @@ def message(update: Update, context: CallbackContext):
                     update.message.reply_text("%s! You will win 20 points whenever another player likes "
                                               "your example.." % get_random_congrats_message(),
                                               reply_markup=reply_markup)
-                update.message.reply_text("Thank you for your submission, you can now /submit another example "
+                update.message.reply_text("Thank you for your submission. You can now /submit another example "
                                           "or /review other submissions.",
                                           reply_markup=reply_markup)
                 del context.user_data["submission"]
