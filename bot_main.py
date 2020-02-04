@@ -135,7 +135,6 @@ def message(update: Update, context: CallbackContext):
                     update.message.reply_text('Are the words "GIVE" and "UP" next to each other or are they separated?',
                                               reply_markup=mwe_category_level_2_keyboard_markup)
                     context.user_data["state"] = "submit_example_type_2"
-                    context.user_data["submission"] = update.message.text
                 elif update.message.text == sub_types[1]:
                     user = get_user_from_update(update)
                     submission = context.user_data["submission"]
@@ -243,7 +242,7 @@ def message(update: Update, context: CallbackContext):
                 print(ex)
 
     except Exception as ex:
-        update.message.reply_text(ex)
+        update.message.reply_text(str(ex))
 
 
 message_handler = MessageHandler(Filters.text, message)
