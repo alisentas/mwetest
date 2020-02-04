@@ -75,21 +75,14 @@ def compare_submissions(s1, s2):
 
 def review(update: Update, context: CallbackContext):
 
-    try:
-        user = get_user_from_update(update)
-        all_submissions = session.query(Submission).filter(Submission.user_id != user.id).all()
-        all_submissions_for_reviewing = [s for s in all_submissions if str(user.id) not in s.users_who_reviewed]
-
-        key = cmp_to_key(compare_submissions)
-        all_submissions_for_reviewing = sorted(all_submissions_for_reviewing, key=key)
-
-        print(all_submissions_for_reviewing)
-    except Exception as e:
-        update.message.reply_text(str(e))
+    user = get_user_from_update(update)
+    all_submissions = session.query(Submission).filter(Submission.user_id != user.id).all()
+    all_submissions_for_reviewing = [s for s in all_submissions if str(user.id) not in s.users_who_reviewed]
 
     if len(all_submissions_for_reviewing) > 0:
-
-        submission = all_submissions_for_reviewing[random.randrange(0, len(all_submissions_for_reviewing))]
+        key = cmp_to_key(compare_submissions)
+        all_submissions_for_reviewing = sorted(all_submissions_for_reviewing, key=key)
+        submission = all_submissions_for_reviewing[0]
 
         submission_category_messages = {
             "together": 'All the words in “GIVE UP” are 👏 together',
@@ -107,7 +100,7 @@ def review(update: Update, context: CallbackContext):
 
     else:
         reply_markup = telegram.ReplyKeyboardRemove()
-        update.message.reply_text("There are no examples from other users right now 🙄, be the first one to /submit.",
+        update.message.reply_text("Currently there are no examples ready for reviewing 🙄, please try later.",
                                   reply_markup=reply_markup)
 
 
