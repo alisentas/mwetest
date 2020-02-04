@@ -49,7 +49,7 @@ dispatcher.add_handler(todays_mwe_handler)
 
 
 def submit(update: Update, context: CallbackContext):
-    update.message.reply_text("Please enter your example for the MWE: '*to give up*'",
+    update.message.reply_text("Please enter your example for the MWE: '*give up*'",
                               parse_mode=telegram.ParseMode.MARKDOWN)
     context.user_data["state"] = "submit_example"
 
