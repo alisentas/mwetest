@@ -138,8 +138,7 @@ def message(update: Update, context: CallbackContext):
                     context.user_data["submission"] = update.message.text
                 elif update.message.text == sub_types[1]:
                     user = get_user_from_update(update)
-                    submission = Submission()
-                    submission.value = update.message.text
+                    submission = context.user_data["submission"]
                     submission.category = "non-mwe"
                     submission.points = 0
                     submission.users_who_reviewed = ''
@@ -154,6 +153,7 @@ def message(update: Update, context: CallbackContext):
                                               "or /review other submissions.",
                                               reply_markup=reply_markup)
                     del context.user_data["state"]
+                    del context.user_data["submission"]
             else:
                 update.message.reply_text("Please choose a valid category.")
             pass
@@ -164,8 +164,7 @@ def message(update: Update, context: CallbackContext):
             ]
             if update.message.text in sub_types:
                 user = get_user_from_update(update)
-                submission = Submission()
-                submission.value = context.user_data["submission"]
+                submission = context.user_data["submission"]
                 if update.message.text == 'All the words in “GIVE UP” are 👏 together':
                     submission.category = "together"
                 elif update.message.text == 'Some words in “GIVE UP” are 🙌 separated':
