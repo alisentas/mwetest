@@ -8,10 +8,10 @@ from users import User
 
 
 def get_user_from_update(update: Update) -> User:
-    user = session.query(User).filter_by(id=update.effective_user.id).first()
+    user = session.query(User).filter(User.id == update.effective_user.id).first()
 
     if user is None:
-        new_user = User(id=update.effective_user.id, username=update.effective_user.username)
+        new_user = User(id=update.effective_user.id, username=update.effective_user.username, language="en")
         if new_user.username is None:
             new_user.username = str(new_user.id)
         session.add(new_user)
@@ -46,45 +46,6 @@ mwe_category_level_2_keyboard = [['All the words in “GIVE UP” are 👏 toget
 
 mwe_category_level_2_keyboard_markup = telegram.ReplyKeyboardMarkup(mwe_category_level_2_keyboard)
 
-
-congrats_messages = [
-    "Nice job",
-    "Well done",
-    "Super",
-    "Awesome",
-    "Magnificent",
-    "Swell",
-    "Superb",
-    "Monumental",
-    "Fantastic",
-    "Grand",
-    "Wonderful",
-    "Majestic",
-    "Stupendous",
-    "Spectacular",
-    "Colossal",
-    "Dynamite",
-    "Fabulous",
-    "Astounding",
-    "Great",
-    "Marvelous",
-    "Phenomenal",
-    "Smashing",
-    "Terrific",
-    "Tremendous",
-    "Prodigious",
-    "Cool",
-    "Groovy",
-    "Extraordinary",
-    "Tops",
-    "Exemplary",
-    "Champion",
-    "Superhero"
-]
-
-
-def get_random_congrats_message() -> str:
-    return congrats_messages[random.randint(0, len(congrats_messages))]
 
 
 points_earned_for_submission = {
