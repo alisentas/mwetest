@@ -7,6 +7,7 @@ from database import Base, engine
 
 POSITIVE_REVIEW = 1
 NEGATIVE_REVIEW = 0
+NEUTRAL_REVIEW = 2
 
 
 class Review(Base):

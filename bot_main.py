@@ -17,8 +17,7 @@ from language import get_language_token, Tokens, get_random_congrats_message
 from users import User
 import key
 from mwe_helper import get_mwe_words
-from reviews import Review, POSITIVE_REVIEW, NEGATIVE_REVIEW
-
+from reviews import Review, POSITIVE_REVIEW, NEGATIVE_REVIEW, NEUTRAL_REVIEW
 
 updater = Updater(key.TELEGRAM_API_KEY, use_context=True)
 dispatcher = updater.dispatcher
@@ -376,6 +375,14 @@ def review_handler_2(user: User, update: Update, context: CallbackContext):
             session.commit()
             review_handler(user, update, context)
         elif update.message.text == review_types[2]:
+            review = Review(
+                user=user,
+                mwe=todays_mwe,
+                submission=submission,
+                review_type=NEUTRAL_REVIEW
+            )
+            session.add(review)
+            session.commit()
             review_handler(user, update, context)
         elif update.message.text == review_types[3]:
             del context.user_data["submission"]
