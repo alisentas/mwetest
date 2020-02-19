@@ -37,6 +37,7 @@ class Tokens(Enum):
     PLEASE_ENTER_VALID_REVIEW = auto()
     TOP_FIVE_USERS = auto()
     NO_SUBMISSIONS = auto()
+    ENTER_VALID_COMMAND = auto()
 
 
 lang_en = {
@@ -72,7 +73,8 @@ lang_en = {
     Tokens.THANKS_FOR_CONTRIBUTION: "Thank you for your contribution!",
     Tokens.PLEASE_ENTER_VALID_REVIEW: "Please enter a valid review",
     Tokens.TOP_FIVE_USERS: "Here are the top 5 users for today:\n",
-    Tokens.NO_SUBMISSIONS: "There are no submissions and users at this time."
+    Tokens.NO_SUBMISSIONS: "There are no submissions and users at this time.",
+    Tokens.ENTER_VALID_COMMAND: "Please enter a valid command"
 }
 
 lang_tr = {
@@ -108,7 +110,8 @@ lang_tr = {
     Tokens.THANKS_FOR_CONTRIBUTION: "Katkılarınız için teşekkürler!",
     Tokens.PLEASE_ENTER_VALID_REVIEW: "Lütfen geçerli bir inceleme seçin",
     Tokens.TOP_FIVE_USERS: "İşte bugünün ilk beşi:\n",
-    Tokens.NO_SUBMISSIONS: "Henüz gönderi ya da oylama yok."
+    Tokens.NO_SUBMISSIONS: "Henüz gönderi ya da oylama yok.",
+    Tokens.ENTER_VALID_COMMAND: "Lütfen geçerli bir komut girin."
 }
 
 

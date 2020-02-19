@@ -490,6 +490,12 @@ def message(update: Update, context: CallbackContext):
                 review_handler(user, update, context)
             elif update.message.text == get_language_token(user.language, Tokens.SHOW_SCOREBOARD):
                 show_scoreboard_handler(user, update, context)
+            else:
+                update.message.reply_text(
+                    get_language_token(user.language, Tokens.ENTER_VALID_COMMAND),
+                    parse_mode=telegram.ParseMode.MARKDOWN,
+                    reply_markup=get_main_keyboard_markup(user.language)
+                )
 
     except Exception as ex:
         update.message.reply_text(str(ex))
