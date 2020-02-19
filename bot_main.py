@@ -1,3 +1,4 @@
+import random
 from collections import defaultdict
 
 import telegram
@@ -51,63 +52,107 @@ start_handler = CommandHandler('start', start)
 dispatcher.add_handler(start_handler)
 
 
+def add_user(name: str, lang: str) -> User:
+    user = User(
+        id=random.randint(1, 10000),
+        username=name,
+        language=lang
+    )
+    session.add(user)
+    session.commit()
+    return user
+
+
+def add_submission_by_user(user: User, subm: str, cat: str, lang: str) -> Submission:
+    submission = Submission(
+        user=user,
+        value=subm,
+        category=cat,
+        language=lang,
+        mwe=mwe_helper.get_todays_mwe(lang)
+    )
+    session.add(submission)
+    session.commit()
+    return submission
+
+
+def add_review_by_user(user: User, submisson: Submission, review_type: int) -> None:
+    review = Review(
+        user=user,
+        submission=submisson,
+        review_type=review_type,
+        mwe=mwe_helper.get_todays_mwe(user.language)
+    )
+    session.add(review)
+    session.commit()
+    pass
+
+
 def load_test_data(update: Update, context: CallbackContext):
     user = get_user_from_update(update)
 
-    user1 = User(
-        username="gulsenc",
-        language="tr"
-    )
-    user2 = User(
-        username="martin",
-        language="en"
-    )
-    user3 = User(
-        username="josip",
-        language="en"
-    )
-    session.add(user1)
-    session.add(user2)
-    session.add(user3)
-    session.commit()
+    turkan_s = add_user("turkan.s", "tr")
+    gordon_f = add_user("gordon.f", "en")
+    michael_j = add_user("michael.j", "en")
+    elvis_p = add_user("elvis.p", "en")
+    david_b = add_user("david.b", "en")
+    donald_t = add_user("donald.t", "en")
+    tarik_a = add_user("tarik.a", "tr")
+    kemal_s = add_user("kemal.s", "tr")
+    munir_o = add_user("munir.o", "tr")
+    zeki_a = add_user("zeki.a", "tr")
 
-    todays_mwe_en = mwe_helper.get_todays_mwe("en")
-    todays_mwe_tr = mwe_helper.get_todays_mwe("tr")
+    submission1 = add_submission_by_user(turkan_s, "İşte şimdi ayvayı yedim.", "together", "tr")
+    submission2 = add_submission_by_user(gordon_f, "Will you give up please?", "together", "en")
+    submission3 = add_submission_by_user(michael_j, "I finally gave up smoking.", "together", "en")
+    submission4 = add_submission_by_user(elvis_p, "Give up now, you're not going to win this fight?", "together", "en")
+    submission5 = add_submission_by_user(david_b, "They will not give that up to me?", "non-mwe", "en")
+    submission6 = add_submission_by_user(donald_t, "Please give this up?", "separated", "en")
+    submission7 = add_submission_by_user(tarik_a, "Ayvayı yedikten sonra doydum.", "non-mwe", "tr")
+    submission8 = add_submission_by_user(kemal_s, "Ayvayı iyi yedik.", "separated", "tr")
+    submission9 = add_submission_by_user(munir_o, "Ayvayı yedik yine.", "together", "tr")
+    submission10 = add_submission_by_user(zeki_a, "Ayva ayva söyle bana, benden güzeli var mı dünyada?", "together", "tr")
 
-    submission1 = Submission(
-        user=user1,
-        value="Bugün de onun başının etini yedim.",
-        category="together",
-        language="tr",
-        mwe=todays_mwe_tr
-    )
-    submission2 = Submission(
-        user=user2,
-        value="I gave up.",
-        category="together",
-        language="en",
-        mwe=todays_mwe_en
-    )
-    submission3 = Submission(
-        user=user3,
-        value="Can you give that up to me?",
-        category="non-mwe",
-        language="en",
-        mwe=todays_mwe_en
-    )
-    session.add(submission1)
-    session.add(submission2)
-    session.add(submission3)
-    session.commit()
-
-    review1 = Review(
-        mwe=todays_mwe_en,
-        user=user2,
-        submission=submission3,
-        review_type=POSITIVE_REVIEW
-    )
-    session.add(review1)
-    session.commit()
+    add_review_by_user(turkan_s, submission7, POSITIVE_REVIEW)
+    add_review_by_user(turkan_s, submission8, POSITIVE_REVIEW)
+    add_review_by_user(turkan_s, submission9, POSITIVE_REVIEW)
+    add_review_by_user(turkan_s, submission10, NEGATIVE_REVIEW)
+    add_review_by_user(tarik_a, submission1, POSITIVE_REVIEW)
+    add_review_by_user(tarik_a, submission8, POSITIVE_REVIEW)
+    add_review_by_user(tarik_a, submission9, POSITIVE_REVIEW)
+    add_review_by_user(tarik_a, submission10, NEGATIVE_REVIEW)
+    add_review_by_user(kemal_s, submission7, POSITIVE_REVIEW)
+    add_review_by_user(kemal_s, submission1, POSITIVE_REVIEW)
+    add_review_by_user(kemal_s, submission9, POSITIVE_REVIEW)
+    add_review_by_user(kemal_s, submission10, NEGATIVE_REVIEW)
+    add_review_by_user(munir_o, submission7, POSITIVE_REVIEW)
+    add_review_by_user(munir_o, submission8, POSITIVE_REVIEW)
+    add_review_by_user(munir_o, submission1, POSITIVE_REVIEW)
+    add_review_by_user(munir_o, submission10, NEGATIVE_REVIEW)
+    add_review_by_user(zeki_a, submission7, NEGATIVE_REVIEW)
+    add_review_by_user(zeki_a, submission8, NEGATIVE_REVIEW)
+    add_review_by_user(zeki_a, submission9, NEGATIVE_REVIEW)
+    add_review_by_user(zeki_a, submission1, NEGATIVE_REVIEW)
+    add_review_by_user(gordon_f, submission3, POSITIVE_REVIEW)
+    add_review_by_user(gordon_f, submission4, POSITIVE_REVIEW)
+    add_review_by_user(gordon_f, submission5, POSITIVE_REVIEW)
+    add_review_by_user(gordon_f, submission6, POSITIVE_REVIEW)
+    add_review_by_user(michael_j, submission2, POSITIVE_REVIEW)
+    add_review_by_user(michael_j, submission4, POSITIVE_REVIEW)
+    add_review_by_user(michael_j, submission5, POSITIVE_REVIEW)
+    add_review_by_user(michael_j, submission6, POSITIVE_REVIEW)
+    add_review_by_user(elvis_p, submission3, POSITIVE_REVIEW)
+    add_review_by_user(elvis_p, submission2, POSITIVE_REVIEW)
+    add_review_by_user(elvis_p, submission5, POSITIVE_REVIEW)
+    add_review_by_user(elvis_p, submission6, POSITIVE_REVIEW)
+    add_review_by_user(david_b, submission3, POSITIVE_REVIEW)
+    add_review_by_user(david_b, submission4, POSITIVE_REVIEW)
+    add_review_by_user(david_b, submission2, POSITIVE_REVIEW)
+    add_review_by_user(david_b, submission6, POSITIVE_REVIEW)
+    add_review_by_user(donald_t, submission3, POSITIVE_REVIEW)
+    add_review_by_user(donald_t, submission4, POSITIVE_REVIEW)
+    add_review_by_user(donald_t, submission5, POSITIVE_REVIEW)
+    add_review_by_user(donald_t, submission6, POSITIVE_REVIEW)
 
     update.message.reply_text(
         get_language_token(user.language, Tokens.WELCOME_MESSAGE) % user.username,
@@ -368,8 +413,8 @@ def show_scoreboard_handler(user: User, update: Update, context: CallbackContext
             user_scores[review.submission.user] += points_earned
 
     user_scores_list = list()
-    for user in user_scores.keys():
-        user_scores_list.append([user, user_scores[user]])
+    for user_i in user_scores.keys():
+        user_scores_list.append([user_i, user_scores[user_i]])
 
     user_scores_list.sort(key=lambda x: x[1])
     user_scores_list.reverse()

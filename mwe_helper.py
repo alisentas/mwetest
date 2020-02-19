@@ -18,11 +18,11 @@ def get_todays_mwe(language: str) -> Mwe:
         else:
             return mwe
     elif language == "tr":
-        mwe: Mwe = session.query(Mwe).filter(Mwe.name == "başının etini yemek").first()
+        mwe: Mwe = session.query(Mwe).filter(Mwe.name == "ayvayı yemek").first()
 
         if mwe is None:
-            mwe = Mwe(name="başının etini yemek",
-                      meaning="karşısındakini bezdirinceye, bıktırıncaya kadar sürekli konuşmak veya bir şeyler söylemek",
+            mwe = Mwe(name="ayvayı yemek",
+                      meaning="kötü bir duruma düşmek",
                       language="tr")
             session.add(mwe)
             session.commit()
